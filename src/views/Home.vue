@@ -8,7 +8,7 @@
 <script>
 import Todos from '../components/Todos';
 import AddTodo from '../components/AddTodo';
-import axios from 'axios';
+import { db } from '../main';
 
 export default {
   name: 'Home',
@@ -23,25 +23,23 @@ export default {
   },
   methods: {
     deleteTodo(id) {
-      axios.delete(`https://jsonplaceholder.typicode.com/todos/${id}`
-      )
-        .then(res => this.todos = this.todos.filter(todo => todo.id !== id))
-        .catch(err => console.log(err));
+      db.collection('todos').doc(id).delete()
     },
     addTodo(newTodo){
-      const { title, completed } = newTodo;
-      axios.post('https://jsonplaceholder.typicode.com/todos', {
-        title,
-        completed
-      })
-        .then(res => this.todos = [...this.todos, res.data])
-        .catch(err => console.log(err));
+      const { title, completed } = newTodo
+      const createdAt = new Date()
+      db.collection('todos').add({ title, completed, createdAt })
+      .catch(function(error) {
+          alert(error);
+      });
     }
   },
   created(){
-      axios.get('https://jsonplaceholder.typicode.com/todos?_limit=5')
-        .then(res => this.todos = res.data)
-        .catch(err => console.log(err));
+      db.collection("todos").get().then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+              this.todos.push(doc.data());
+          });
+      });
     }
 }
 </script>
