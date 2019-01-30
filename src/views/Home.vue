@@ -8,7 +8,7 @@
 <script>
 import Todos from '../components/Todos';
 import AddTodo from '../components/AddTodo';
-import { db } from '../main';
+import { db } from '../config/db';
 
 export default {
   name: 'Home',
@@ -29,15 +29,20 @@ export default {
       const { title, completed } = newTodo
       const createdAt = new Date()
       db.collection('todos').add({ title, completed, createdAt })
+      .then(function(doc) {
+        console.log(doc);
+      })
       .catch(function(error) {
           alert(error);
       });
     }
   },
   created(){
-      db.collection("todos").get().then((querySnapshot) => {
+      db.collection('todos').orderBy('completed').orderBy('title').get().then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
-              this.todos.push(doc.data());
+            const data = doc.data();
+            data.id = doc.id;
+            this.todos.push(data);
           });
       });
     }
