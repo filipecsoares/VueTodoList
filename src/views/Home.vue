@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <AddTodo v-on:add-todo="addTodo" />
-    <Todos v-bind:todos="todos" v-on:del-todo="deleteTodo" />
+    <Todos v-bind:todos="todos" v-on:del-todo="deleteTodo" v-on:change-todo="updateTodo" />
   </div>
 </template>
 
@@ -24,25 +24,33 @@ export default {
   methods: {
     deleteTodo(id) {
       db.collection('todos').doc(id).delete()
+      this.todos = this.todos.filter(function(value){
+        return value.id !== id;
+      });
     },
     addTodo(newTodo){
       const { title, completed } = newTodo
       const createdAt = new Date()
+      let self = this;
       db.collection('todos').add({ title, completed, createdAt })
       .then(function(doc) {
-        console.log(doc);
+        self.todos.unshift({id: doc.id, title, completed, createdAt});
       })
       .catch(function(error) {
           alert(error);
       });
+    },
+    updateTodo(todo){
+      db.collection('todos').doc(todo.id).set(todo)
     }
   },
   created(){
-      db.collection('todos').orderBy('completed').orderBy('title').get().then((querySnapshot) => {
+      db.collection('todos').orderBy('completed').orderBy('createdAt', 'desc').get().then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            data.id = doc.id;
-            this.todos.push(data);
+            this.todos.push({
+              ...doc.data(),
+              id: doc.id
+            });
           });
       });
     }

@@ -9,6 +9,6 @@ var config = {
     storageBucket: "todolist-6dd80.appspot.com",
     messagingSenderId: "4083858646"
   };
-  let app = firebase.initializeApp(config);
+firebase.initializeApp(config);
 
-  export const db = app.firestore();
+  export const db = firebase.firestore();
