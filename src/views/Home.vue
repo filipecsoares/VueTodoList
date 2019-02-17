@@ -41,7 +41,15 @@ export default {
       });
     },
     updateTodo(todo){
-      db.collection('todos').doc(todo.id).set(todo)
+      db.collection('todos').doc(todo.id).set(todo);
+      this.todos = this.todos.filter(function(value){
+        return value.id !== todo.id;
+      });
+      if(todo.completed){
+        this.todos.push(todo);
+      }else{
+        this.todos.unshift(todo);
+      }
     }
   },
   created(){
